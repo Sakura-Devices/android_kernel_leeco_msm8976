@@ -610,7 +610,7 @@ void rpc_shutdown_client(struct rpc_clnt *clnt)
 	might_sleep();
 
 	dprintk_rcu("RPC:       shutting down %s client for %s\n",
-			clnt->cl_protname,
+			clnt->cl_program->name,
 			rcu_dereference(clnt->cl_xprt)->servername);
 
 	while (!list_empty(&clnt->cl_tasks)) {
@@ -630,7 +630,7 @@ static void
 rpc_free_client(struct rpc_clnt *clnt)
 {
 	dprintk_rcu("RPC:       destroying %s client for %s\n",
-			clnt->cl_protname,
+			clnt->cl_program->name,
 			rcu_dereference(clnt->cl_xprt)->servername);
 	if (clnt->cl_parent != clnt)
 		rpc_release_client(clnt->cl_parent);
@@ -1280,7 +1280,7 @@ call_start(struct rpc_task *task)
 	struct rpc_clnt	*clnt = task->tk_client;
 
 	dprintk("RPC: %5u call_start %s%d proc %s (%s)\n", task->tk_pid,
-			clnt->cl_protname, clnt->cl_vers,
+			clnt->cl_program->name, clnt->cl_vers,
 			rpc_proc_name(task),
 			(RPC_IS_ASYNC(task) ? "async" : "sync"));
 
@@ -1897,7 +1897,7 @@ call_status(struct rpc_task *task)
 	default:
 		if (clnt->cl_chatty)
 			printk("%s: RPC call returned error %d\n",
-			       clnt->cl_protname, -status);
+			       clnt->cl_program->name, -status);
 		rpc_exit(task, status);
 	}
 }
@@ -1928,7 +1928,7 @@ call_timeout(struct rpc_task *task)
 		if (clnt->cl_chatty) {
 			rcu_read_lock();
 			printk(KERN_NOTICE "%s: server %s not responding, timed out\n",
-				clnt->cl_protname,
+				clnt->cl_program->name,
 				rcu_dereference(clnt->cl_xprt)->servername);
 			rcu_read_unlock();
 		}
@@ -1944,7 +1944,7 @@ call_timeout(struct rpc_task *task)
 		if (clnt->cl_chatty) {
 			rcu_read_lock();
 			printk(KERN_NOTICE "%s: server %s not responding, still trying\n",
-			clnt->cl_protname,
+			clnt->cl_program->name,
 			rcu_dereference(clnt->cl_xprt)->servername);
 			rcu_read_unlock();
 		}
@@ -1979,7 +1979,7 @@ call_decode(struct rpc_task *task)
 		if (clnt->cl_chatty) {
 			rcu_read_lock();
 			printk(KERN_NOTICE "%s: server %s OK\n",
-				clnt->cl_protname,
+				clnt->cl_program->name,
 				rcu_dereference(clnt->cl_xprt)->servername);
 			rcu_read_unlock();
 		}
@@ -2004,7 +2004,7 @@ call_decode(struct rpc_task *task)
 			goto out_retry;
 		}
 		dprintk("RPC:       %s: too small RPC reply size (%d bytes)\n",
-				clnt->cl_protname, task->tk_status);
+				clnt->cl_program->name, task->tk_status);
 		task->tk_action = call_timeout;
 		goto out_retry;
 	}
@@ -2276,7 +2276,7 @@ static void rpc_show_task(const struct rpc_clnt *clnt,
 	printk(KERN_INFO "%5u %04x %6d %8p %8p %8ld %8p %sv%u %s a:%ps q:%s\n",
 		task->tk_pid, task->tk_flags, task->tk_status,
 		clnt, task->tk_rqstp, task->tk_timeout, task->tk_ops,
-		clnt->cl_protname, clnt->cl_vers, rpc_proc_name(task),
+		clnt->cl_program->name, clnt->cl_vers, rpc_proc_name(task),
 		task->tk_action, rpc_waitq);
 }
 
